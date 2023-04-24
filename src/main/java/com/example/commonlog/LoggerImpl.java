@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 class LoggerImpl implements Logger {
@@ -18,7 +19,7 @@ class LoggerImpl implements Logger {
         this.logger = LoggerFactory.getLogger(clazz);
     }
 
-    @Override
+    /*@Override
     public void trace(String message, Object... params) {
 
     }
@@ -36,7 +37,7 @@ class LoggerImpl implements Logger {
     @Override
     public void debug(IdType idType, Object id, String message, Object... params) {
         oneIdType(LogLevel.DEBUG, idType, id, message, params);
-    }
+    }*/
 
     @Override
     public void info(String message, Object... params) {
@@ -44,11 +45,11 @@ class LoggerImpl implements Logger {
     }
 
     @Override
-    public void info(IdType idType, Object id, String message, Object... params) {
-        oneIdType(LogLevel.INFO, idType, id, message, params);
+    public void info(LogRef logRef, String message, Object... params) {
+        oneIdType(LogLevel.INFO, logRef, message, params);
     }
 
-    @Override
+    /*@Override
     public void warn(String message, Object... params) {
 
     }
@@ -66,33 +67,32 @@ class LoggerImpl implements Logger {
     @Override
     public void error(IdType idType, Object id, String message, Object... params) {
         oneIdType(LogLevel.ERROR, idType, id, message, params);
-    }
+    }*/
 
-    private void oneIdType(LogLevel logLevel, IdType idType, Object id, String message, Object... params) {
-        TreeSet<IdType> idSet = new TreeSet<>();
+    private void oneIdType(LogLevel logLevel, LogRef logRef, String message, Object... params) {
+        TreeMap<Integer, LogRef> orderedLogRef = new TreeMap<>();
 
-        idType.setId(id);
-        idSet.add(idType);
+        orderedLogRef.put(logRef.getPriority(), logRef);
 
-        Map<String, Object[]> logMessageParams = buildLogMessageParams(idSet, params, message);
+        Map<String, Object[]> logMessageParams = buildLogMessageParams(orderedLogRef, params, message);
 
         Map.Entry<String, Object[]> entry = logMessageParams.entrySet().iterator().next();
 
         logMessage(logLevel, entry.getKey(), entry.getValue());
     }
 
-    private Map<String, Object[]> buildLogMessageParams(TreeSet<IdType> idSet, Object[] params, String message) {
-        if (idSet == null) idSet = new TreeSet<>();
+    private Map<String, Object[]> buildLogMessageParams(TreeMap<Integer, LogRef> orderedLogRef, Object[] params, String message) {
+        if (orderedLogRef == null) orderedLogRef = new TreeMap<>();
 
-        int baseParametersSize = idSet.size() + 1;
+        int baseParametersSize = orderedLogRef.size() + 1;
 
         Object[] logParams = new Object[params.length + baseParametersSize];
         StringBuilder logString = new StringBuilder();
 
         int i = 0;
-        for (IdType idType : idSet) {
-            logParams[i] = idType.getId();
-            logString.append(idType.getPrefix());
+        for (LogRef logRef : orderedLogRef.values()) {
+            logParams[i] = logRef.getValue();
+            logString.append(logRef.getMessage());
             i++;
         }
 

@@ -3,6 +3,8 @@ package com.example.commonlog;
 //import org.springframework.boot.SpringApplication;
 //import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import static com.example.commonlog.CaseRef.CASE;
+
 //@SpringBootApplication
 public class CommonLogApplication {
 
@@ -10,6 +12,6 @@ public class CommonLogApplication {
 
     public static void main(String[] args) {
         //SpringApplication.run(CommonLogApplication.class, args);
-        log.error(IdType.CASE_ID, "1", "test {}", 10 );
+        log.info(CASE(2), "test {}", 10 );
     }
 }
